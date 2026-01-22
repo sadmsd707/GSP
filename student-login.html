@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Login - Soham</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 15px 40px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .login-container {
+      max-width: 400px;
+      margin: 60px auto;
+      background: white;
+      padding: 40px 30px;
+      border-radius: 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    .login-container h2 {
+      color: #2563eb;
+      margin-bottom: 25px;
+      font-size: 1.6rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #1e40af;
+      font-size: 1rem;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .login-container input:focus {
+      border: 1px solid #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.3s;
+    }
+
+    .login-btn:hover {
+      background: #1e40af;
+    }
+
+    .info-text {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: #2563eb;
+      text-decoration: none;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      padding: 20px;
+      text-align: center;
+      background: #2563eb;
+      color: white;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+
+    .student-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #2563eb;
+    }
+
+    .validation-message {
+      font-size: 0.8rem;
+      margin-top: 5px;
+      color: #6b7280;
+      display: none;
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .login-info {
+      background: #dbeafe;
+      border: 1px solid #2563eb;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .login-info h4 {
+      color: #1e40af;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .login-info p {
+      color: #475569;
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+    }
+    
+    /* New style for required field indicator */
+    .required-field::after {
+      content: " *";
+      color: #dc2626;
+    }
+
+    /* Error message style */
+    .error-message {
+      background: #fee2e2;
+      border: 1px solid #ef4444;
+      color: #b91c1c;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    /* Success message style */
+    .success-message {
+      background: #dcfce7;
+      border: 1px solid #10b981;
+      color: #065f46;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    /* Forgot password link */
+    .forgot-link {
+      display: inline-block;
+      color: #6b7280;
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+
+    .forgot-link:hover {
+      color: #2563eb;
+      text-decoration: underline;
+    }
+
+    /* Password visibility toggle */
+    .password-container {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .password-toggle:hover {
+      color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Soham Student Portal</h1>
+  </header>
+
+  <div class="login-container">
+    <div class="student-icon">👨‍🎓</div>
+    <h2>Student Login</h2>
+    
+    <!-- Error Message -->
+    <div class="error-message" id="errorMessage">
+      Invalid Student ID, Password, or Mother's Name. Please try again.
+    </div>
+    
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+      Login successful! Redirecting to dashboard...
+    </div>
+    
+    <div class="login-info">
+      <h4>Login Information</h4>
+      <p><strong>Student ID:</strong> Use the ID created by your teacher</p>
+      <p><strong>Password:</strong> 290108 (default for all students)</p>
+      <p><strong>Mother's Name:</strong> Enter your mother's full name (as registered by teacher)</p>
+      <p><em>Contact your teacher if you've forgotten your credentials</em></p>
+    </div>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="studentId" class="required-field">Student ID</label>
+        <input type="text" id="studentId" placeholder="Enter your Student ID" required />
+        <div id="studentIdMessage" class="validation-message"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="required-field">Password</label>
+        <div class="password-container">
+          <input type="password" id="password" placeholder="Enter your Password" required />
+          <button type="button" class="password-toggle" id="passwordToggle">👁️</button>
+        </div>
+        <div id="passwordMessage" class="validation-message"></div>
+      </div>
+      
+      <!-- Mother's Name field -->
+      <div class="form-group">
+        <label for="motherName" class="required-field">Mother's Name</label>
+        <input type="text" id="motherName" placeholder="Enter your Mother's Full Name" required />
+        <div id="motherNameMessage" class="validation-message"></div>
+      </div>
+      
+      <button type="submit" class="login-btn" id="loginButton">Login</button>
+      
+      <a href="forgot-credentials.html" class="forgot-link">Forgot Student ID, Password or Mother's Name?</a>
+    </form>
+    
+    <a href="role-selection.html" class="back-link">← Back to Role Selection</a>
+    
+    <p class="info-text">Please contact administration if you've forgotten your credentials</p>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Soham Educational Institute. All rights reserved.</p>
+     <p style="margin-top: 10px; font-size: 0.9rem;">Made with ❤️ by Team Soham</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const studentIdInput = document.getElementById("studentId");
+    const passwordInput = document.getElementById("password");
+    const motherNameInput = document.getElementById("motherName");
+    const loginButton = document.getElementById("loginButton");
+    const passwordToggle = document.getElementById("passwordToggle");
+    const studentIdMessage = document.getElementById("studentIdMessage");
+    const passwordMessage = document.getElementById("passwordMessage");
+    const motherNameMessage = document.getElementById("motherNameMessage");
+    const errorMessage = document.getElementById("errorMessage");
+    const successMessage = document.getElementById("successMessage");
+
+    // Password visibility toggle
+    let isPasswordVisible = false;
+    passwordToggle.addEventListener("click", function() {
+      isPasswordVisible = !isPasswordVisible;
+      passwordInput.type = isPasswordVisible ? "text" : "password";
+      this.textContent = isPasswordVisible ? "🙈" : "👁️";
+    });
+
+    // Form submission
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      // Hide all messages
+      errorMessage.classList.remove("show");
+      successMessage.classList.remove("show");
+      studentIdMessage.style.display = "none";
+      passwordMessage.style.display = "none";
+      motherNameMessage.style.display = "none";
+      
+      const studentId = studentIdInput.value.trim();
+      const password = passwordInput.value.trim();
+      const motherName = motherNameInput.value.trim();
+
+      // Validate inputs
+      let isValid = true;
+      
+      if (!studentId) {
+        studentIdMessage.textContent = "Please enter your Student ID";
+        studentIdMessage.style.display = "block";
+        studentIdMessage.style.color = "#dc2626";
+        isValid = false;
+      } else if (studentId.length < 3) {
+        studentIdMessage.textContent = "Student ID must be at least 3 characters";
+        studentIdMessage.style.display = "block";
+        studentIdMessage.style.color = "#dc2626";
+        isValid = false;
+      }
+      
+      if (!password) {
+        passwordMessage.textContent = "Please enter your password";
+        passwordMessage.style.display = "block";
+        passwordMessage.style.color = "#dc2626";
+        isValid = false;
+      } else if (password.length < 6) {
+        passwordMessage.textContent = "Password must be at least 6 characters";
+        passwordMessage.style.display = "block";
+        passwordMessage.style.color = "#dc2626";
+        isValid = false;
+      }
+      
+      if (!motherName) {
+        motherNameMessage.textContent = "Please enter your mother's name";
+        motherNameMessage.style.display = "block";
+        motherNameMessage.style.color = "#dc2626";
+        isValid = false;
+      } else if (motherName.length < 3) {
+        motherNameMessage.textContent = "Please enter a valid mother's name";
+        motherNameMessage.style.display = "block";
+        motherNameMessage.style.color = "#dc2626";
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      // Check if user came from role selection
+      const userRole = localStorage.getItem("userRole");
+      if (userRole !== "student") {
+        errorMessage.textContent = "Please select student role first from role selection page";
+        errorMessage.classList.add("show");
+        return;
+      }
+
+      // Check institute code
+      const instituteCode = localStorage.getItem("instituteCode");
+      if (!instituteCode) {
+        errorMessage.textContent = "Institute code not found. Please start from institute code page.";
+        errorMessage.classList.add("show");
+        return;
+      }
+
+      // Show loading state
+      loginButton.textContent = "Logging in...";
+      loginButton.classList.add("loading");
+      loginButton.disabled = true;
+
+      // Get student credentials from localStorage (created by teacher)
+      const studentCredentials = JSON.parse(localStorage.getItem('studentCredentials')) || [];
+      
+      // Find student by ID, password, and mother's name (case-insensitive for mother's name)
+      const student = studentCredentials.find(s => 
+        s.studentId.toLowerCase() === studentId.toLowerCase() && 
+        s.password === password
+      );
+
+      // Check mother's name separately for better error messages
+      let motherNameMatch = false;
+      if (student && student.motherName) {
+        // Case-insensitive comparison for mother's name
+        motherNameMatch = student.motherName.toLowerCase() === motherName.toLowerCase();
+      }
+
+      if (student && motherNameMatch) {
+        // Store student info
+        localStorage.setItem("currentStudent", JSON.stringify({
+          studentId: student.studentId,
+          name: student.name,
+          class: student.class,
+          motherName: student.motherName,
+          role: "student",
+          loginTime: new Date().toISOString()
+        }));
+        
+        // Save mother's name for future autofill (optional)
+        localStorage.setItem("lastMotherName", motherName);
+        
+        // Set login status
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("username", student.name);
+        localStorage.setItem("userRole", "student");
+        
+        // Show success message
+        successMessage.classList.add("show");
+        
+        // Redirect to student dashboard after delay
+        setTimeout(() => {
+          window.location.href = "student-dashboard.html";
+        }, 1500);
+      } else {
+        // Reset button
+        loginButton.textContent = "Login";
+        loginButton.classList.remove("loading");
+        loginButton.disabled = false;
+        
+        // Show appropriate error message
+        if (!student) {
+          if (studentCredentials.length === 0) {
+            errorMessage.textContent = "No students registered yet. Please ask your teacher to add students first.";
+          } else {
+            errorMessage.textContent = "Invalid Student ID or Password";
+          }
+        } else if (!motherNameMatch) {
+          errorMessage.textContent = "Mother's name does not match. Please enter the name registered by your teacher.";
+        } else {
+          errorMessage.textContent = "Invalid Student ID, Password, or Mother's Name";
+        }
+        
+        errorMessage.classList.add("show");
+        
+        // Clear password field for security
+        passwordInput.value = "";
+        
+        // Shake animation for error
+        form.style.animation = "shake 0.5s";
+        setTimeout(() => {
+          form.style.animation = "";
+        }, 500);
+      }
+    });
+
+    // Clear validation messages when user starts typing
+    studentIdInput.addEventListener('input', function() {
+      studentIdMessage.style.display = "none";
+      errorMessage.classList.remove("show");
+    });
+
+    passwordInput.addEventListener('input', function() {
+      passwordMessage.style.display = "none";
+      errorMessage.classList.remove("show");
+    });
+    
+    motherNameInput.addEventListener('input', function() {
+      motherNameMessage.style.display = "none";
+      errorMessage.classList.remove("show");
+    });
+
+    // Check if user came from role selection on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const userRole = localStorage.getItem("userRole");
+      const instituteCode = localStorage.getItem("instituteCode");
+      
+      // Check institute code
+      if (!instituteCode) {
+        window.location.href = "institute-code.html";
+        return;
+      }
+      
+      // Check role
+      if (userRole !== "student") {
+        // Show info message
+        errorMessage.textContent = "Please select 'Student' role from the role selection page.";
+        errorMessage.classList.add("show");
+        
+        // Disable form temporarily
+        loginButton.disabled = true;
+        
+        // Redirect after 3 seconds
+        setTimeout(() => {
+          window.location.href = "role-selection.html";
+        }, 3000);
+        return;
+      }
+      
+      // Pre-populate student ID from localStorage if available
+      const lastStudentId = localStorage.getItem("lastStudentId");
+      if (lastStudentId) {
+        studentIdInput.value = lastStudentId;
+      }
+      
+      // Pre-populate mother's name from localStorage if available
+      const lastMotherName = localStorage.getItem("lastMotherName");
+      if (lastMotherName) {
+        motherNameInput.value = lastMotherName;
+      }
+      
+      // Check if there are any students registered
+      const studentCredentials = JSON.parse(localStorage.getItem('studentCredentials')) || [];
+      if (studentCredentials.length === 0) {
+        errorMessage.textContent = "No students registered yet. Please ask your teacher to add students first.";
+        errorMessage.classList.add("show");
+        loginButton.disabled = true;
+      }
+    });
+
+    // Add shake animation to CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Save student ID when user types (for future autofill)
+    studentIdInput.addEventListener('blur', function() {
+      if (this.value.trim()) {
+        localStorage.setItem("lastStudentId", this.value.trim());
+      }
+    });
+
+    // Enter key navigation between fields
+    studentIdInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        passwordInput.focus();
+      }
+    });
+
+    passwordInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        motherNameInput.focus();
+      }
+    });
+
+    motherNameInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        form.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // Auto-capitalize mother's name
+    motherNameInput.addEventListener('blur', function() {
+      if (this.value) {
+        // Capitalize first letter of each word
+        this.value = this.value.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+      }
+    });
+
+    // Demo credentials hint (for testing purposes only - remove in production)
+    const studentCredentials = JSON.parse(localStorage.getItem('studentCredentials')) || [];
+    if (studentCredentials.length > 0 && studentCredentials[0]) {
+      console.log("Demo credentials for testing:");
+      console.log("Student ID:", studentCredentials[0].studentId);
+      console.log("Password: 290108");
+      console.log("Mother's Name:", studentCredentials[0].motherName || "Not set");
+    }
+  </script>
+</body>
+</html>
