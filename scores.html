@@ -26,6 +26,7 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: relative;
     }
 
     header h1 {
@@ -33,59 +34,126 @@
       font-weight: 700;
     }
 
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 20px;
-    }
-
-    nav ul li a {
-      text-decoration: none;
-      color: white;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    nav ul li a:hover {
-      color: #dbeafe;
-    }
-
-    .logout-btn {
-      background: #dbeafe;
-      color: #1e3a8a;
+    /* Hamburger Menu Styles */
+    .hamburger {
+      background: none;
       border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
       cursor: pointer;
-      font-weight: 500;
-      margin-left: 20px;
-      transition: background 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      padding: 0;
     }
 
-    .logout-btn:hover {
-      background: #bfdbfe;
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: white;
+      border-radius: 3px;
+      transition: all 0.3s ease;
     }
 
-    .scores-container {
+    /* Side Navigation Panel */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.4s ease;
+      z-index: 1000;
+      padding-top: 70px;
+    }
+
+    .side-nav.active {
+      right: 0;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .side-nav ul li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul li a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+
+    .side-nav ul li a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 40px;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Dashboard Styles */
+    .dashboard {
+      padding: 30px 20px;
       max-width: 1200px;
-      margin: 40px auto;
-      padding: 0 20px;
+      margin: auto;
     }
 
-    .scores-header {
-      text-align: center;
-      margin-bottom: 40px;
+    .welcome-section {
+      background: linear-gradient(to right, #2563eb, #1e3a8a);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
     }
 
-    .scores-header h2 {
-      color: #1e3a8a;
+    .welcome-section::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(30deg);
+    }
+
+    .welcome-section h2 {
       font-size: 2.2rem;
       margin-bottom: 10px;
+      position: relative;
     }
 
-    .scores-header p {
-      color: #64748b;
-      font-size: 1.1rem;
+    .welcome-section p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      position: relative;
     }
 
     .subject-tabs {
@@ -477,12 +545,6 @@
     @media (max-width: 768px) {
       header {
         padding: 15px 20px;
-        flex-direction: column;
-        gap: 15px;
-      }
-      
-      nav ul {
-        gap: 10px;
       }
       
       .test-results {
@@ -517,28 +579,50 @@
       .grid {
         grid-template-columns: repeat(5, 1fr);
       }
+      
+      .welcome-section h2 {
+        font-size: 1.8rem;
+      }
+      
+      .welcome-section p {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Soham</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="exam.html">Practice</a></li>
-        <li><a href="#" style="color: #dbeafe;">Scores</a></li>
-        <li><a href="index.html">Login</a></li>
-      </ul>
-    </nav>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </header>
 
-  <section class="scores-container">
-    <div class="scores-header">
-      <h2>Your MHT-CET Test Results</h2>
+  <!-- Side Navigation -->
+  <div class="side-nav" id="sideNav">
+    <ul>
+      <li><a href="student-dashboard.html">Home</a></li>
+      <li><a href="take-test.html">Take a Test</a></li>
+      <li><a href="exam.html">Practice</a></li>
+      <li><a href="scores.html">Scores</a></li>
+      <li><a href="student-announcements.html">Announcements</a></li>
+      <li><a href="student-resources.html">Resources</a></li>
+      <li><a href="board-prep.html">Board Preparation</a></li>
+      <li><a href="student-account.html">My Account</a></li>
+      <li><a href="role-selection.html" onclick="logout()">Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Overlay for closing the menu when clicking outside -->
+  <div class="overlay" id="overlay"></div>
+
+  <main class="dashboard">
+    <section class="welcome-section">
+      <h2>Your Test Results</h2>
       <p>Review your past performance and track your progress</p>
-    </div>
+    </section>
 
     <div class="subject-tabs">
       <div class="subject-tab active" onclick="filterTests('all')">All Subjects</div>
@@ -550,7 +634,7 @@
     <div class="test-results" id="testResults">
       <!-- Test results will be dynamically inserted here -->
     </div>
-  </section>
+  </main>
 
   <footer>
     <p>&copy; 2026 Soham - MHT-CET Exam Practice. All rights reserved.</p>
@@ -572,6 +656,33 @@
   </div>
 
   <script>
+    // Hamburger menu functionality
+    const hamburger = document.getElementById('hamburger');
+    const sideNav = document.getElementById('sideNav');
+    const overlay = document.getElementById('overlay');
+
+    hamburger.addEventListener('click', () => {
+      sideNav.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sideNav.classList.contains('active') ? 'hidden' : 'auto';
+    });
+
+    overlay.addEventListener('click', () => {
+      sideNav.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close menu when clicking on a link
+    const navLinks = document.querySelectorAll('.side-nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
+    });
+
     // Check if user is logged in
     if (localStorage.getItem("isLoggedIn") !== "true") {
       window.location.href = "login.html";
