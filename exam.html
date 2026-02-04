@@ -15,12 +15,15 @@
 
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+      background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
       color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
-      background: #1e3a8a;
+      background: #2563eb;
       color: white;
       padding: 15px 40px;
       display: flex;
@@ -41,7 +44,7 @@
       position: absolute;
       left: 20px;
       bottom: -35px;
-      background: #1e3a8a;   /* matches header/footer */
+      background: #2563eb;
       color: white;
       padding: 6px 14px;
       border-radius: 20px;
@@ -51,24 +54,88 @@
     }
 
     .back-btn:hover {
-      background: #1e40af;   /* hover effect */
+      background: #1d4ed8;
     }
 
-    nav ul {
-      list-style: none;
+    /* Hamburger Menu Styles */
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
       display: flex;
-      gap: 20px;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      padding: 0;
     }
 
-    nav a {
-      text-decoration: none;
+    .hamburger span {
+      display: block;
+      height: 3px;
+      width: 100%;
+      background-color: white;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    /* Side Navigation Panel */
+    .side-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #2563eb, #1e3a8a);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.4s ease;
+      z-index: 1000;
+      padding-top: 70px;
+    }
+
+    .side-nav.active {
+      right: 0;
+    }
+
+    .side-nav ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .side-nav ul li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .side-nav ul li a {
+      display: block;
       color: white;
-      font-weight: 500;
-      transition: color 0.3s ease;
+      text-decoration: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
     }
 
-    nav a:hover {
-      color: #93c5fd;
+    .side-nav ul li a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 40px;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
     }
 
     .exam-options {
@@ -78,6 +145,7 @@
       gap: 35px;
       max-width: 1100px;
       margin: auto;
+      flex: 1;
     }
 
     .exam-card {
@@ -88,6 +156,10 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
       transition: transform 0.3s, box-shadow 0.3s;
       border: 1px solid #e5e7eb;
+      height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .exam-card:hover {
@@ -96,16 +168,17 @@
     }
 
     .exam-card h3 {
-      color: #1e3a8a;
+      color: #2563eb;
       font-size: 1.4rem;
       margin-bottom: 12px;
     }
 
     .exam-card p {
       font-size: 0.95rem;
-      color: #555;
+      color: #4b5563;
       line-height: 1.6;
       margin-bottom: 20px;
+      flex-grow: 1;
     }
 
     .exam-card a {
@@ -120,17 +193,21 @@
     }
 
     .exam-card a:hover {
-      background: #1e40af;
+      background: #1d4ed8;
       transform: scale(1.05);
     }
 
     footer {
-      margin-top: 60px;
       padding: 20px;
       text-align: center;
-      background: #1e3a8a;
+      background: #2563eb;
       color: white;
       font-size: 0.9rem;
+      margin-top: auto;
+    }
+    
+    footer p {
+      margin: 5px 0;
     }
   </style>
 </head>
@@ -138,15 +215,30 @@
   <header>
     <h1>Soham</h1>
     <a href="index.html" class="back-btn">⬅ Back</a>
-    <nav>
-      <ul>
-        <li><a href="home.html">Home</a></li>
-        <li><a href="exam.html">Practice</a></li>
-        <li><a href="scores.html">Scores</a></li>
-        <li><a href="index.html">Login</a></li>
-      </ul>
-    </nav>
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </header>
+
+  <!-- Side Navigation -->
+  <div class="side-nav" id="sideNav">
+    <ul>
+      <li><a href="student-dashboard.html">Home</a></li>
+      <li><a href="take-test.html">Take a Test</a></li>
+      <li><a href="exam.html">Practice</a></li>
+      <li><a href="scores.html">Scores</a></li>
+      <li><a href="student-announcement.html">Announcements</a></li>
+      <li><a href="student-resources.html">Resources</a></li>
+      <li><a href="board-prep.html">Board Preparation</a></li>
+      <li><a href="student-account.html">My Account</a></li>
+      <li><a href="role-selection.html">Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Overlay for closing the menu when clicking outside -->
+  <div class="overlay" id="overlay"></div>
 
   <section class="exam-options">
     <div class="exam-card">
@@ -168,7 +260,36 @@
 
   <footer>
     <p>&copy; 2026 Soham. All rights reserved.</p>
-     <p style="margin-top: 10px; font-size: 0.9rem;">Made with ❤️ by Team Soham</p>
+    <p>Made with ❤️ by Team Soham</p>
   </footer>
+
+  <script>
+    // Hamburger menu functionality
+    const hamburger = document.getElementById('hamburger');
+    const sideNav = document.getElementById('sideNav');
+    const overlay = document.getElementById('overlay');
+
+    hamburger.addEventListener('click', () => {
+      sideNav.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sideNav.classList.contains('active') ? 'hidden' : 'auto';
+    });
+
+    overlay.addEventListener('click', () => {
+      sideNav.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close menu when clicking on a link
+    const navLinks = document.querySelectorAll('.side-nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sideNav.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
+    });
+  </script>
 </body>
 </html>

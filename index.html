@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Institute Code - Soham</title>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * {
       margin: 0;
@@ -108,6 +110,48 @@
       transform: translateY(0);
     }
 
+    /* Google Sign-In Container */
+    .google-signin-container {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #googleSignInBtn {
+      width: 100%;
+      height: 48px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+
+    #googleSignInBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 30px 0;
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .divider span {
+      padding: 0 15px;
+    }
+
     .error {
       color: #dc2626;
       margin-top: 15px;
@@ -120,11 +164,28 @@
       display: none;
     }
 
+    .success {
+      color: #059669;
+      margin-top: 15px;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 10px;
+      background-color: #f0fdf4;
+      border-radius: 8px;
+      border: 1px solid #bbf7d0;
+      display: none;
+    }
+
     .info-text {
       color: #6b7280;
       font-size: 0.9rem;
       margin-top: 20px;
       line-height: 1.5;
+    }
+
+    /* Modal for institute code after Google sign-in - REMOVED */
+    .modal-overlay {
+      display: none;
     }
 
     footer {
@@ -165,46 +226,209 @@
         <input type="text" id="instituteCode" placeholder="Enter your institute code" required />
       </div>
       <button type="submit" class="continue-btn">Continue</button>
+      
+      <div class="divider">
+        <span>OR</span>
+      </div>
+      
+      <div class="google-signin-container">
+        <div id="googleSignInBtn"></div>
+        <p class="info-text">Sign in with your Google account</p>
+      </div>
+      
       <p id="errorMsg" class="error"></p>
+      <p id="successMsg" class="success"></p>
       <p class="info-text">Please enter the unique code provided by your educational institute to access the platform.</p>
     </form>
   </div>
 
   <footer>
     <p>&copy; 2026 Soham. All rights reserved.</p>
-     <p style="margin-top: 10px; font-size: 0.9rem;">Made with ❤️ by Team Soham</p>
+    <p style="margin-top: 10px; font-size: 0.9rem;">Made with ❤️ by Team Soham</p>
   </footer>
 
   <script>
-    const form = document.getElementById("instituteForm");
-    const errorMsg = document.getElementById("errorMsg");
-    const instituteCodeInput = document.getElementById("instituteCode");
+    // IMPORTANT: Replace with your actual Google Client ID
+    const GOOGLE_CLIENT_ID = '1084593936206-cfnqgk283lkosfjvkjgtb3co2t2cg1l9.apps.googleusercontent.com';
+    
+    // DOM Elements
+    const form = document.getElementById('instituteForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const instituteCodeInput = document.getElementById('instituteCode');
 
-    form.addEventListener("submit", function(e) {
-      e.preventDefault();
+    // Store Google user data
+    let googleUserData = null;
+
+    // Initialize Google Sign-In
+    function initializeGoogleSignIn() {
+      if (!window.google) {
+        console.error('Google Identity Services library not loaded');
+        return;
+      }
+
+      try {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          context: 'signin',
+          ux_mode: 'popup',
+          login_uri: window.location.origin,
+        });
+
+        // Render the Google Sign-In button
+        google.accounts.id.renderButton(
+          document.getElementById('googleSignInBtn'),
+          {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
+            text: 'continue_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+          }
+        );
+      } catch (error) {
+        console.error('Error initializing Google Sign-In:', error);
+        errorMsg.textContent = 'Google Sign-In is currently unavailable. Please use institute code.';
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    // Handle Google Sign-In response
+    function handleGoogleResponse(response) {
+      console.log('Google Sign-In response received');
       
-      // Hide error message initially
-      errorMsg.style.display = "none";
+      // Decode the JWT token to get user info
+      const responsePayload = decodeJWT(response.credential);
+      
+      if (responsePayload) {
+        googleUserData = {
+          name: responsePayload.name,
+          email: responsePayload.email,
+          picture: responsePayload.picture,
+          sub: responsePayload.sub, // Google user ID
+          token: response.credential
+        };
+        
+        console.log('Google user authenticated:', googleUserData.email);
+        
+        // Store user data
+        storeGoogleUserData();
+        
+        // Redirect directly to admin-login.html
+        redirectToAdminLogin();
+      } else {
+        showError('Failed to authenticate with Google. Please try again.');
+      }
+    }
+
+    // Store Google user data in localStorage
+    function storeGoogleUserData() {
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('loginMethod', 'google');
+      localStorage.setItem('userEmail', googleUserData.email);
+      localStorage.setItem('userName', googleUserData.name);
+      localStorage.setItem('userPicture', googleUserData.picture || '');
+      localStorage.setItem('googleUserId', googleUserData.sub);
+      localStorage.setItem('loginTime', new Date().toISOString());
+      
+      if (googleUserData.token) {
+        localStorage.setItem('googleToken', googleUserData.token);
+      }
+    }
+
+    // Redirect to admin-login.html
+    function redirectToAdminLogin() {
+      showSuccess('Google authentication successful! Redirecting...');
+      
+      // Redirect after short delay
+      setTimeout(() => {
+        window.location.href = 'admin-login.html';
+      }, 1000);
+    }
+
+    // Decode JWT token (helper function)
+    function decodeJWT(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+        return JSON.parse(jsonPayload);
+      } catch (error) {
+        console.error('Error decoding JWT:', error);
+        return null;
+      }
+    }
+
+    // Show success message
+    function showSuccess(message) {
+      successMsg.textContent = message;
+      successMsg.style.display = 'block';
+      errorMsg.style.display = 'none';
+    }
+
+    // Show error message
+    function showError(message) {
+      errorMsg.textContent = message;
+      errorMsg.style.display = 'block';
+      successMsg.style.display = 'none';
+    }
+
+    // Institute code form submission
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
       
       const instituteCode = instituteCodeInput.value.trim();
 
-      // Validate input
       if (!instituteCode) {
-        errorMsg.textContent = "Please enter institute code!";
-        errorMsg.style.display = "block";
+        showError('Please enter institute code!');
         instituteCodeInput.focus();
         return;
       }
 
-      // Store institute info and redirect to role-selection.html
-      localStorage.setItem("instituteCode", instituteCode);
-      localStorage.setItem("isLoggedIn", "true");
-      window.location.href = "role-selection.html";
+      // Store institute info and redirect
+      localStorage.setItem('instituteCode', instituteCode);
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('loginMethod', 'instituteCode');
+      localStorage.setItem('loginTime', new Date().toISOString());
+      
+      window.location.href = 'role-selection.html';
     });
 
-    // Focus on input when page loads
+    // Initialize when DOM is loaded
     window.addEventListener('DOMContentLoaded', () => {
       instituteCodeInput.focus();
+      
+      // Check if Google library is loaded, then initialize
+      if (window.google) {
+        initializeGoogleSignIn();
+      } else {
+        // Wait for Google library to load
+        const checkGoogle = setInterval(() => {
+          if (window.google) {
+            clearInterval(checkGoogle);
+            initializeGoogleSignIn();
+          }
+        }, 100);
+        
+        // Fallback if Google doesn't load within 5 seconds
+        setTimeout(() => {
+          if (!window.google) {
+            clearInterval(checkGoogle);
+            console.warn('Google Identity Services not loaded');
+            document.getElementById('googleSignInBtn').innerHTML = 
+              '<button style="width:100%;padding:14px;background:white;border:1.5px solid #d1d5db;border-radius:12px;color:#333;font-weight:600;cursor:not-allowed;opacity:0.7;">Google Sign-In Unavailable</button>';
+          }
+        }, 5000);
+      }
     });
   </script>
 </body>
