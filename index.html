@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Institute Code - Soham</title>
+  <!-- Preconnect for faster Google loading -->
+  <link rel="preconnect" href="https://accounts.google.com">
+  <link rel="preconnect" href="https://www.google.com">
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
@@ -77,12 +80,19 @@
       outline: none;
       transition: all 0.3s ease;
       background-color: #f9fafb;
+      color: #111827; /* Better contrast */
     }
 
     .institute-container input:focus {
       border-color: #2563eb;
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
       background-color: white;
+    }
+
+    /* Focus visible for accessibility */
+    :focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
     }
 
     .continue-btn {
@@ -98,16 +108,62 @@
       margin-top: 10px;
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      min-height: 44px; /* Better touch target */
     }
 
-    .continue-btn:hover {
+    .continue-btn:hover:not(:disabled) {
       background: #1d4ed8;
       transform: translateY(-2px);
       box-shadow: 0 6px 15px rgba(37, 99, 235, 0.35);
     }
 
-    .continue-btn:active {
+    .continue-btn:active:not(:disabled) {
       transform: translateY(0);
+    }
+
+    .continue-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Retry button for Google sign-in fallback */
+    .retry-btn {
+      width: 100%;
+      padding: 14px;
+      background: white;
+      border: 1.5px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #333;
+      transition: all 0.3s ease;
+      min-height: 48px;
+    }
+
+    .retry-btn:hover {
+      background: #f9fafb;
+      border-color: #2563eb;
+      color: #2563eb;
     }
 
     /* Google Sign-In Container */
@@ -126,11 +182,18 @@
       overflow: hidden;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       transition: all 0.3s ease;
+      min-height: 48px; /* Better touch target */
     }
 
     #googleSignInBtn:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    #googleSignInBtn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
     }
 
     .divider {
@@ -152,28 +215,51 @@
       padding: 0 15px;
     }
 
+    /* Error and success messages with transitions */
     .error {
       color: #dc2626;
-      margin-top: 15px;
+      margin-top: 0;
       font-size: 0.9rem;
       text-align: center;
-      padding: 10px;
+      padding: 0;
       background-color: #fef2f2;
       border-radius: 8px;
-      border: 1px solid #fecaca;
-      display: none;
+      border: 0 solid #fecaca;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .error.show {
+      max-height: 100px;
+      opacity: 1;
+      padding: 10px;
+      margin-top: 15px;
+      border-width: 1px;
     }
 
     .success {
       color: #059669;
-      margin-top: 15px;
+      margin-top: 0;
       font-size: 0.9rem;
       text-align: center;
-      padding: 10px;
+      padding: 0;
       background-color: #f0fdf4;
       border-radius: 8px;
-      border: 1px solid #bbf7d0;
-      display: none;
+      border: 0 solid #bbf7d0;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .success.show {
+      max-height: 100px;
+      opacity: 1;
+      padding: 10px;
+      margin-top: 15px;
+      border-width: 1px;
     }
 
     .info-text {
@@ -183,8 +269,54 @@
       line-height: 1.5;
     }
 
-    /* Modal for institute code after Google sign-in - REMOVED */
-    .modal-overlay {
+    /* Cookie consent banner */
+    #cookieConsent {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1f2937;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+    }
+
+    #cookieConsent p {
+      margin-bottom: 15px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    #cookieConsent button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #cookieConsent button:hover {
+      background: #1d4ed8;
+    }
+
+    /* Offline indicator */
+    #offlineIndicator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #dc2626;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.9rem;
+      z-index: 1000;
       display: none;
     }
 
@@ -197,6 +329,7 @@
       margin-top: auto;
     }
 
+    /* Mobile-specific improvements */
     @media (max-width: 480px) {
       .institute-container {
         margin: 40px 20px;
@@ -210,10 +343,38 @@
       .institute-container h2 {
         font-size: 1.6rem;
       }
+      
+      /* Prevent zoom on input focus for iOS */
+      input, select, textarea {
+        font-size: 16px;
+      }
+      
+      #cookieConsent {
+        padding: 15px;
+      }
+      
+      #cookieConsent p {
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .institute-container {
+        padding: 30px 20px;
+      }
+      
+      header {
+        padding: 15px 20px;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Offline indicator -->
+  <div id="offlineIndicator" style="display: none;">
+    ⚠️ You are offline. Some features may not work.
+  </div>
+
   <header>
     <h1>Soham</h1>
   </header>
@@ -223,9 +384,19 @@
     <form id="instituteForm">
       <div class="form-group">
         <label for="instituteCode">Institute Code</label>
-        <input type="text" id="instituteCode" placeholder="Enter your institute code" required />
+        <input 
+          type="text" 
+          id="instituteCode" 
+          placeholder="Enter your institute code" 
+          required 
+          aria-label="Institute Code"
+          aria-describedby="codeFormatHint"
+        />
       </div>
-      <button type="submit" class="continue-btn">Continue</button>
+      <button type="submit" class="continue-btn" aria-label="Continue with institute code">
+        <span id="submitText">Continue</span>
+        <div id="submitSpinner" class="spinner" style="display: none;"></div>
+      </button>
       
       <div class="divider">
         <span>OR</span>
@@ -236,10 +407,16 @@
         <p class="info-text">Sign in with your Google account</p>
       </div>
       
-      <p id="errorMsg" class="error"></p>
-      <p id="successMsg" class="success"></p>
+      <p id="errorMsg" class="error" aria-live="polite"></p>
+      <p id="successMsg" class="success" aria-live="polite"></p>
       <p class="info-text">Please enter the unique code provided by your educational institute to access the platform.</p>
     </form>
+  </div>
+
+  <!-- Cookie consent banner -->
+  <div id="cookieConsent">
+    <p>We use essential cookies for authentication and security. By continuing, you agree to our use of cookies.</p>
+    <button onclick="acceptCookies()">Accept</button>
   </div>
 
   <footer>
@@ -256,17 +433,146 @@
     const errorMsg = document.getElementById('errorMsg');
     const successMsg = document.getElementById('successMsg');
     const instituteCodeInput = document.getElementById('instituteCode');
+    const submitBtn = document.querySelector('.continue-btn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const offlineIndicator = document.getElementById('offlineIndicator');
+    const cookieConsent = document.getElementById('cookieConsent');
 
-    // Store Google user data
+    // State variables
     let googleUserData = null;
+    let submitAttempts = 0;
+    let lastSubmitTime = 0;
+    let googleSignInTimeout;
+    let isOnline = navigator.onLine;
 
-    // Initialize Google Sign-In
-    function initializeGoogleSignIn() {
-      if (!window.google) {
-        console.error('Google Identity Services library not loaded');
+    // Initialize when DOM is loaded
+    window.addEventListener('DOMContentLoaded', () => {
+      // Set focus to institute code input
+      instituteCodeInput.focus();
+      
+      // Check and show cookie consent if needed
+      checkCookieConsent();
+      
+      // Set up online/offline detection
+      setupOnlineDetection();
+      
+      // Initialize Google Sign-In
+      initializeGoogleSignIn();
+      
+      // Add input event for auto-uppercase
+      instituteCodeInput.addEventListener('input', function(e) {
+        this.value = this.value.toUpperCase();
+      });
+      
+      // Add paste event handling
+      instituteCodeInput.addEventListener('paste', function(e) {
+        setTimeout(() => {
+          this.value = this.value.toUpperCase().replace(/\s+/g, '');
+        }, 0);
+      });
+      
+      // Add Enter key support
+      instituteCodeInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          form.dispatchEvent(new Event('submit'));
+        }
+      });
+    });
+
+    // =====================
+    // SECURITY & VALIDATION
+    // =====================
+    
+    function sanitizeInput(input) {
+      // Remove any potentially harmful characters, keep only alphanumeric and hyphens
+      return input.replace(/[^a-zA-Z0-9-]/g, '').trim();
+    }
+    
+    function isValidInstituteCode(code) {
+      // Validate format: 3-6 letters, hyphen, 3-6 numbers
+      return /^[A-Z]{3,6}-[0-9]{3,6}$/.test(code);
+    }
+    
+    // =====================
+    // FORM SUBMISSION
+    // =====================
+    
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Rate limiting check
+      const now = Date.now();
+      if (now - lastSubmitTime < 2000) { // 2 second cooldown
+        showError('Please wait before trying again.');
         return;
       }
-
+      
+      if (submitAttempts >= 5) {
+        showError('Too many attempts. Please try again in 5 minutes.');
+        submitBtn.disabled = true;
+        setTimeout(() => {
+          submitBtn.disabled = false;
+          submitAttempts = 0;
+        }, 300000); // 5 minutes
+        return;
+      }
+      
+      submitAttempts++;
+      lastSubmitTime = now;
+      
+      const rawCode = instituteCodeInput.value.trim();
+      const sanitizedCode = sanitizeInput(rawCode);
+      
+      if (!sanitizedCode) {
+        showError('Please enter institute code!');
+        instituteCodeInput.focus();
+        return;
+      }
+      
+      if (!isValidInstituteCode(sanitizedCode)) {
+        showError('Invalid institute code format. Use format like ABC-123');
+        instituteCodeInput.focus();
+        instituteCodeInput.select();
+        return;
+      }
+      
+      // Show loading state
+      setSubmitButtonLoading(true);
+      
+      // Simulate API call delay (remove in production)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Log event for analytics
+      logEvent('institute_code_submit', {
+        codeLength: sanitizedCode.length,
+        codeFormatValid: isValidInstituteCode(sanitizedCode),
+        timestamp: new Date().toISOString()
+      });
+      
+      // Store institute info and redirect
+      localStorage.setItem('instituteCode', sanitizedCode);
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('loginMethod', 'instituteCode');
+      localStorage.setItem('loginTime', new Date().toISOString());
+      
+      // Redirect to role selection
+      window.location.href = 'role-selection.html';
+    });
+    
+    // =====================
+    // GOOGLE SIGN-IN
+    // =====================
+    
+    function initializeGoogleSignIn() {
+      if (!window.google) {
+        console.warn('Google Identity Services library not loaded');
+        startGoogleFallbackCheck();
+        return;
+      }
+      
       try {
         google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
@@ -277,10 +583,10 @@
           ux_mode: 'popup',
           login_uri: window.location.origin,
         });
-
+        
         // Render the Google Sign-In button
         google.accounts.id.renderButton(
-          document.getElementById('googleSignInBtn'),
+          googleSignInBtn,
           {
             theme: 'outline',
             size: 'large',
@@ -290,16 +596,26 @@
             logo_alignment: 'left',
           }
         );
+        
+        // Add error listener
+        google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            console.log('Google Sign-In prompt not displayed');
+          }
+        });
+        
       } catch (error) {
         console.error('Error initializing Google Sign-In:', error);
-        errorMsg.textContent = 'Google Sign-In is currently unavailable. Please use institute code.';
-        errorMsg.style.display = 'block';
+        handleGoogleError({ type: 'initialization_failed' });
       }
     }
-
-    // Handle Google Sign-In response
+    
     function handleGoogleResponse(response) {
       console.log('Google Sign-In response received');
+      clearGoogleSignInTimeout();
+      
+      // Start Google sign-in timeout
+      startGoogleSignInTimeout();
       
       // Decode the JWT token to get user info
       const responsePayload = decodeJWT(response.credential);
@@ -315,17 +631,87 @@
         
         console.log('Google user authenticated:', googleUserData.email);
         
+        // Log event
+        logEvent('google_signin_success', {
+          email: googleUserData.email,
+          timestamp: new Date().toISOString()
+        });
+        
         // Store user data
         storeGoogleUserData();
         
         // Redirect directly to admin-login.html
         redirectToAdminLogin();
       } else {
-        showError('Failed to authenticate with Google. Please try again.');
+        handleGoogleError({ type: 'token_decode_failed' });
       }
     }
-
-    // Store Google user data in localStorage
+    
+    function handleGoogleError(error) {
+      console.error('Google Sign-In Error:', error);
+      clearGoogleSignInTimeout();
+      
+      let errorMessage = 'Google Sign-In failed. Please use institute code or try again.';
+      
+      if (error.type === 'popup_closed_by_user') {
+        errorMessage = 'Sign-in cancelled. Please try again.';
+      } else if (error.type === 'access_denied') {
+        errorMessage = 'Access denied. Please check your Google account permissions.';
+      } else if (error.type === 'initialization_failed') {
+        errorMessage = 'Google Sign-In is currently unavailable. Please use institute code.';
+      }
+      
+      showError(errorMessage);
+      
+      // Fallback button if Google fails
+      if (!window.google || error.type === 'initialization_failed') {
+        googleSignInBtn.innerHTML = `
+          <button class="retry-btn" onclick="retryGoogleSignIn()">
+            Retry Google Sign-In
+          </button>
+        `;
+      }
+    }
+    
+    function startGoogleSignInTimeout() {
+      googleSignInTimeout = setTimeout(() => {
+        showError('Google Sign-In is taking too long. Please try again.');
+        googleSignInBtn.innerHTML = `
+          <button class="retry-btn" onclick="retryGoogleSignIn()">
+            Retry Google Sign-In
+          </button>
+        `;
+      }, 10000); // 10 second timeout
+    }
+    
+    function clearGoogleSignInTimeout() {
+      if (googleSignInTimeout) {
+        clearTimeout(googleSignInTimeout);
+        googleSignInTimeout = null;
+      }
+    }
+    
+    function startGoogleFallbackCheck() {
+      const checkInterval = setInterval(() => {
+        if (window.google) {
+          clearInterval(checkInterval);
+          initializeGoogleSignIn();
+        }
+      }, 100);
+      
+      // Fallback after 5 seconds
+      setTimeout(() => {
+        if (!window.google) {
+          clearInterval(checkInterval);
+          handleGoogleError({ type: 'initialization_failed' });
+        }
+      }, 5000);
+    }
+    
+    // =====================
+    // STORAGE & REDIRECT
+    // =====================
+    
     function storeGoogleUserData() {
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('loginMethod', 'google');
@@ -339,8 +725,7 @@
         localStorage.setItem('googleToken', googleUserData.token);
       }
     }
-
-    // Redirect to admin-login.html
+    
     function redirectToAdminLogin() {
       showSuccess('Google authentication successful! Redirecting...');
       
@@ -349,8 +734,11 @@
         window.location.href = 'admin-login.html';
       }, 1000);
     }
-
-    // Decode JWT token (helper function)
+    
+    // =====================
+    // UTILITY FUNCTIONS
+    // =====================
+    
     function decodeJWT(token) {
       try {
         const base64Url = token.split('.')[1];
@@ -367,68 +755,146 @@
         return null;
       }
     }
-
-    // Show success message
+    
+    function setSubmitButtonLoading(isLoading) {
+      if (isLoading) {
+        submitBtn.disabled = true;
+        submitText.style.display = 'none';
+        submitSpinner.style.display = 'inline-block';
+      } else {
+        submitBtn.disabled = false;
+        submitText.style.display = 'inline';
+        submitSpinner.style.display = 'none';
+      }
+    }
+    
     function showSuccess(message) {
       successMsg.textContent = message;
-      successMsg.style.display = 'block';
-      errorMsg.style.display = 'none';
+      successMsg.classList.add('show');
+      errorMsg.classList.remove('show');
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        successMsg.classList.remove('show');
+      }, 5000);
     }
-
-    // Show error message
+    
     function showError(message) {
       errorMsg.textContent = message;
-      errorMsg.style.display = 'block';
-      successMsg.style.display = 'none';
-    }
-
-    // Institute code form submission
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
+      errorMsg.classList.add('show');
+      successMsg.classList.remove('show');
       
-      const instituteCode = instituteCodeInput.value.trim();
-
-      if (!instituteCode) {
-        showError('Please enter institute code!');
-        instituteCodeInput.focus();
+      // Auto-hide after 8 seconds for errors
+      setTimeout(() => {
+        errorMsg.classList.remove('show');
+      }, 8000);
+    }
+    
+    // =====================
+    // ONLINE/OFFLINE DETECTION
+    // =====================
+    
+    function setupOnlineDetection() {
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
+      updateOnlineStatus(); // Initial check
+    }
+    
+    function updateOnlineStatus() {
+      isOnline = navigator.onLine;
+      
+      if (isOnline) {
+        offlineIndicator.style.display = 'none';
+        googleSignInBtn.classList.remove('disabled');
+        submitBtn.disabled = false;
+      } else {
+        offlineIndicator.style.display = 'block';
+        googleSignInBtn.classList.add('disabled');
+        showError('You are offline. Some features may not work.');
+      }
+    }
+    
+    // =====================
+    // COOKIE CONSENT
+    // =====================
+    
+    function checkCookieConsent() {
+      const hasConsent = localStorage.getItem('cookieConsent');
+      if (!hasConsent && window.location.hostname !== 'localhost') {
+        setTimeout(() => {
+          cookieConsent.style.display = 'block';
+        }, 1000);
+      }
+    }
+    
+    function acceptCookies() {
+      localStorage.setItem('cookieConsent', 'accepted');
+      cookieConsent.style.display = 'none';
+      logEvent('cookie_consent_accepted');
+    }
+    
+    // =====================
+    // ANALYTICS & LOGGING
+    // =====================
+    
+    function logEvent(eventName, data = {}) {
+      // Only log in production (not localhost)
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log(`[DEV] Event: ${eventName}`, data);
         return;
       }
-
-      // Store institute info and redirect
-      localStorage.setItem('instituteCode', instituteCode);
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('loginMethod', 'instituteCode');
-      localStorage.setItem('loginTime', new Date().toISOString());
       
-      window.location.href = 'role-selection.html';
-    });
-
-    // Initialize when DOM is loaded
-    window.addEventListener('DOMContentLoaded', () => {
-      instituteCodeInput.focus();
+      // Add timestamp and page info
+      const eventData = {
+        event: eventName,
+        timestamp: new Date().toISOString(),
+        page: window.location.pathname,
+        userAgent: navigator.userAgent,
+        online: navigator.onLine,
+        ...data
+      };
       
-      // Check if Google library is loaded, then initialize
+      console.log(`[Analytics] ${eventName}:`, eventData);
+      
+      // Here you would send to your analytics service
+      // Example: fetch('/api/analytics', { method: 'POST', body: JSON.stringify(eventData) });
+    }
+    
+    // =====================
+    // RETRY FUNCTION
+    // =====================
+    
+    function retryGoogleSignIn() {
+      if (!isOnline) {
+        showError('Cannot retry while offline. Please check your connection.');
+        return;
+      }
+      
+      googleSignInBtn.innerHTML = ''; // Clear previous content
+      showError(''); // Clear any previous errors
+      
+      // Try to reinitialize Google Sign-In
       if (window.google) {
         initializeGoogleSignIn();
       } else {
-        // Wait for Google library to load
-        const checkGoogle = setInterval(() => {
-          if (window.google) {
-            clearInterval(checkGoogle);
-            initializeGoogleSignIn();
-          }
-        }, 100);
-        
-        // Fallback if Google doesn't load within 5 seconds
-        setTimeout(() => {
-          if (!window.google) {
-            clearInterval(checkGoogle);
-            console.warn('Google Identity Services not loaded');
-            document.getElementById('googleSignInBtn').innerHTML = 
-              '<button style="width:100%;padding:14px;background:white;border:1.5px solid #d1d5db;border-radius:12px;color:#333;font-weight:600;cursor:not-allowed;opacity:0.7;">Google Sign-In Unavailable</button>';
-          }
-        }, 5000);
+        // Reload the Google script
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.onload = initializeGoogleSignIn;
+        script.onerror = () => {
+          handleGoogleError({ type: 'script_load_failed' });
+        };
+        document.head.appendChild(script);
       }
+    }
+    
+    // Initial analytics event
+    logEvent('page_loaded', {
+      referrer: document.referrer || 'direct',
+      screenWidth: window.screen.width,
+      screenHeight: window.screen.height
     });
   </script>
 </body>
